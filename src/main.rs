@@ -9,6 +9,7 @@ use warp::Filter;
 
 mod database;
 mod errors;
+mod routes;
 mod schema;
 
 #[tokio::main]
@@ -17,7 +18,12 @@ async fn main() -> anyhow::Result<()> {
 
     // Connect to the database
     let database_pool = database::connect().context("failed to connect to the database")?;
-    let database_filter = warp::any().map(move || database_pool.clone());
+
+    // Generate system routes
+    let routes = routes::build(database_pool).recover(errors::handle_rejection);
+
+    // Start the server
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 
     Ok(())
 }

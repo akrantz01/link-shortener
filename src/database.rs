@@ -1,10 +1,11 @@
 use crate::schema::links;
 use anyhow::Context;
 use diesel::{pg::PgConnection, r2d2::ConnectionManager};
-use r2d2::{Pool as R2D2Pool, PooledConnection};
+use r2d2::{Error as R2D2Error, Pool as R2D2Pool, PooledConnection};
 
-type Pool = R2D2Pool<ConnectionManager<PgConnection>>;
-pub type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
+pub type Pool = R2D2Pool<ConnectionManager<PgConnection>>;
+pub type DbConnection = Result<PooledConnection<ConnectionManager<PgConnection>>, R2D2Error>;
+
 embed_migrations!();
 
 /// Connect to the database

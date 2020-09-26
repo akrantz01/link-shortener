@@ -1,11 +1,34 @@
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
 use r2d2::Error as R2D2Error;
 use serde::Serialize;
-use std::fmt;
+use std::{convert::Infallible, fmt};
 use warp::{
     http::StatusCode,
-    reply::{json, with_status, Reply},
+    reject,
+    reply::{self, Reply},
+    Rejection,
 };
+
+/// Reject an error that can be converted to an API error
+pub fn to_rejection<T: Into<ApiError>>(e: T) -> Rejection {
+    reject::custom(e.into())
+}
+
+/// Return responses for unhandled errors
+pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
+    if err.is_not_found() {
+        Ok(ApiError::new("not found".into(), StatusCode::NOT_FOUND).to_http())
+    } else if let Some(e) = err.find::<ApiError>() {
+        Ok(e.to_http())
+    } else {
+        eprintln!("unhandled internal error: {:?}", err);
+        Ok(ApiError::new(
+            "internal server error".into(),
+            StatusCode::INTERNAL_SERVER_ERROR,
+        )
+        .to_http())
+    }
+}
 
 #[derive(Debug, Serialize)]
 pub struct ApiError {
@@ -26,12 +49,13 @@ impl ApiError {
     }
 
     /// Convert the error into a HTTP response
-    pub fn into_http(self) -> impl Reply {
-        with_status(json(&self), self.status_code)
+    pub fn to_http(&self) -> impl Reply {
+        reply::with_status(reply::json(self), self.status_code)
     }
 }
 
 impl std::error::Error for ApiError {}
+impl warp::reject::Reject for ApiError {}
 
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
