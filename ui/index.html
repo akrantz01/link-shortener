@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Metadata -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>Link Management</title>
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/ui/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/ui/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/ui/favicon-16x16.png" />
+    <link rel="manifest" href="/ui/site.webmanifest" />
+    <link rel="mask-icon" href="/ui/safari-pinned-tab.svg" color="#2b5797" />
+    <meta name="msapplication-TileColor" content="#2b5797" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- Halfmoon CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/halfmoon@1.1.0/css/halfmoon-variables.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/ui/index.css" />
+
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/d93b4ec6d6.js" crossorigin="anonymous"></script>
+</head>
+<body class="with-custom-webkit-scrollbars with-custom-css-scrollbars" data-dm-shortcut-enabled="true" data-set-preferred-mode-onload="true">
+    <!-- Create link modal -->
+    <div class="modal" id="create-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <a href="#" class="close" role="button" aria-label="Close">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </a>
+
+                <h5 class="modal-title">Create a link</h5>
+                <form id="create-modal-form">
+                    <div class="form-group">
+                        <label for="create-link-name" class="required">Name</label>
+                        <input type="text" id="create-link-name" class="form-control" placeholder="github" required="required"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-link-url" class="required">URL</label>
+                        <input id="create-link-url" class="form-control" type="url" placeholder="https://github.com/akrantz01" required="required"/>
+                    </div>
+                    <div class="text-right mt-20">
+                        <button id="create-modal-cancel" class="btn mr-5" type="button">Cancel</button>
+                        <input class="btn btn-success" type="submit" value="Create" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit link modal -->
+    <div class="modal" id="edit-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <a href="#" class="close" role="button" aria-label="Close">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </a>
+
+                <h5 class="modal-title">Edit <code class="code" style="font-size: 1.5rem" id="edit-link-display-name"></code></h5>
+                <form id="edit-modal-form">
+                    <div class="form-group">
+                        <label for="edit-link-name">Name</label>
+                        <input type="text" id="edit-link-name" class="form-control" placeholder=""/>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-link-url">URL</label>
+                        <input id="edit-link-url" class="form-control" type="url" placeholder=""/>
+                    </div>
+                    <div class="form-group custom-switch">
+                        <input type="checkbox" id="edit-link-enabled"/>
+                        <label for="edit-link-enabled">Enabled</label>
+                    </div>
+                    <div class="text-right mt-20">
+                        <button id="edit-modal-cancel" class="btn mr-5" type="button">Cancel</button>
+                        <input class="btn btn-success" type="submit" value="Update" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div class="modal" id="delete-confirm-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <a href="#" class="close" role="button" aria-label="Close">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </a>
+
+                <h5 class="modal-title">Delete link?</h5>
+                <p class="text-muted">Are you sure you want to delete <code class="code" id="delete-link-name"></code>? This action cannot be undone.</p>
+
+                <br/>
+
+                <div class="btn-group-lg text-center" role="group">
+                    <button id="delete-confirm-cancel" class="btn" type="button">Nevermind</button>
+                    <button id="delete-confirm-button" class="btn btn-danger" type="button">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-wrapper with-navbar">
+        <!-- Sticky alerts (toasts) -->
+        <!-- Reference: https://www.gethalfmoon.com/docs/sticky-alerts-toasts -->
+        <div class="sticky-alerts"></div>
+
+        <!-- Navbar -->
+        <nav class="navbar">
+            <p class="navbar-brand">Link Management</p>
+            <div class="d-none d-md-flex ml-auto">
+                <button id="navbar-create" type="button" class="btn btn-success"><i class="fas fa-plus"></i>&nbsp;&nbsp;Add Link</button>
+                <button id="navbar-refresh" type="button" class="btn btn-primary ml-5"><i class="fas fa-sync"></i>&nbsp;&nbsp;Refresh</button>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <div class="content-wrapper">
+            <div class="container-fluid">
+                <div class="content">
+                    <!-- Alternate navigation for small devices -->
+                    <div class="d-md-none">
+                        <div class="row row-eq-spacing">
+                            <div class="col">
+                                <button id="navbar-create-small" type="button" class="btn btn-success"><i class="fas fa-plus"></i>&nbsp;&nbsp;Add Link</button>
+                            </div>
+                            <div class="col">
+                                <button id="navbar-refresh-small" type="button" class="btn btn-primary"><i class="fas fa-sync"></i>&nbsp;&nbsp;Refresh</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table of all links -->
+                    <table class="table table-hover table-striped table-responsive">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Link</th>
+                            <th>Enabled?</th>
+                            <th>Times Used</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="links-content"></tbody>
+                    </table>
+                    <div id="links-loading" class="text-center">
+                        <br/>
+                        <div class="spinner" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Halfmoon JS -->
+    <script src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.0/js/halfmoon.min.js"></script>
+
+    <!-- Application JS -->
+    <script src="/ui/index.js"></script>
+</body>
+</html>
