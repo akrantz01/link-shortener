@@ -1,3 +1,4 @@
+#[deny(unused_variables, warnings, dead_code)]
 #[macro_use]
 extern crate diesel;
 #[macro_use]
