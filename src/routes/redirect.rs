@@ -1,6 +1,7 @@
+use crate::errors::ApiError;
 use crate::{database::DbConnection, database::Link, errors::to_rejection};
 use diesel::prelude::*;
-use warp::http::Uri;
+use warp::http::{StatusCode, Uri};
 
 /// Handle a redirection to a given URL
 /// This is the core handler that enables the short link functionality
@@ -18,6 +19,14 @@ pub async fn redirect_link(
         .filter(name.eq(path))
         .first::<Link>(&conn)
         .map_err(to_rejection)?;
+
+    // Fail if the link is disabled
+    if !found.enabled {
+        return Err(to_rejection(ApiError::new(
+            "not found".into(),
+            StatusCode::NOT_FOUND,
+        )));
+    }
 
     // Convert the plain link to a URI
     let uri = found.link.parse::<Uri>().unwrap();
