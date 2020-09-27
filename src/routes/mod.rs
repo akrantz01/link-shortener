@@ -11,13 +11,13 @@ use auth::auth;
 /// Build the routing table for the API
 pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Rejection> + Clone {
     // Create a filter for the pool
-    let pool_collection = warp::any().map(move || pool.get());
+    let pool_filter = warp::any().map(move || pool.get());
 
     // Redirect handler
     let redirect = warp::get()
         .and(warp::path::param())
         .and(warp::path::end())
-        .and(pool_collection.clone())
+        .and(pool_filter.clone())
         .and_then(redirect::redirect_link);
 
     // UI static files handlers
@@ -36,24 +36,24 @@ pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Reje
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 16))
         .and(warp::body::json())
-        .and(pool_collection.clone())
+        .and(pool_filter.clone())
         .and_then(api::create_link);
     let api_list = warp::get()
         .and(warp::path::path("api"))
         .and(warp::path::end())
-        .and(pool_collection.clone())
+        .and(pool_filter.clone())
         .and_then(api::list_links);
     let api_update = warp::put()
         .and(path!("api" / i32))
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 16))
         .and(warp::body::json())
-        .and(pool_collection.clone())
+        .and(pool_filter.clone())
         .and_then(api::update_link);
     let api_delete = warp::delete()
         .and(path!("api" / i32))
         .and(warp::path::end())
-        .and(pool_collection.clone())
+        .and(pool_filter)
         .and_then(api::delete_link);
 
     // The set of routes to be protected
