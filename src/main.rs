@@ -20,7 +20,9 @@ async fn main() -> anyhow::Result<()> {
     let database_pool = database::connect().context("failed to connect to the database")?;
 
     // Generate system routes
-    let routes = routes::build(database_pool).recover(errors::handle_rejection);
+    let routes = routes::build(database_pool)
+        .recover(errors::handle_rejection)
+        .boxed();
 
     // Start the server
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;

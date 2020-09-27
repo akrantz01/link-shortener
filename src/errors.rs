@@ -15,18 +15,31 @@ pub fn to_rejection<T: Into<ApiError>>(e: T) -> Rejection {
 }
 
 /// Return responses for unhandled errors
-pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
+pub async fn handle_rejection(err: Rejection) -> Result<Box<dyn Reply>, Infallible> {
+    // Convert 404 to JSON
     if err.is_not_found() {
-        Ok(ApiError::new("not found".into(), StatusCode::NOT_FOUND).to_http())
+        Ok(Box::new(
+            ApiError::new("not found".into(), StatusCode::NOT_FOUND).to_http(),
+        ))
+
+    // Request user credentials
+    } else if let Some(e) = err.find::<BasicAuthError>() {
+        Ok(Box::new(e.to_http()))
+
+    // Convert error to JSON
     } else if let Some(e) = err.find::<ApiError>() {
-        Ok(e.to_http())
+        Ok(Box::new(e.to_http()))
+
+    // Unknown error
     } else {
         eprintln!("unhandled internal error: {:?}", err);
-        Ok(ApiError::new(
-            "internal server error".into(),
-            StatusCode::INTERNAL_SERVER_ERROR,
-        )
-        .to_http())
+        Ok(Box::new(
+            ApiError::new(
+                "internal server error".into(),
+                StatusCode::INTERNAL_SERVER_ERROR,
+            )
+            .to_http(),
+        ))
     }
 }
 
@@ -55,7 +68,7 @@ impl ApiError {
 }
 
 impl std::error::Error for ApiError {}
-impl warp::reject::Reject for ApiError {}
+impl reject::Reject for ApiError {}
 
 impl fmt::Display for ApiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -95,3 +108,27 @@ impl From<R2D2Error> for ApiError {
         ApiError::new(format!("{}", error), StatusCode::INTERNAL_SERVER_ERROR)
     }
 }
+
+/// Fail a request and prompt the user for credentials
+#[derive(Debug)]
+pub struct BasicAuthError(String);
+
+impl BasicAuthError {
+    /// Create a new error with the given message
+    pub fn new(realm: &str) -> Self {
+        Self(realm.into())
+    }
+
+    /// Build the response
+    fn to_http(&self) -> impl Reply {
+        let body = reply::html("401 Unauthorized");
+        let header = reply::with_header(
+            body,
+            "WWW-Authenticate",
+            format!("Basic realm=\"{}\", charset=\"UTF-8\"", self.0),
+        );
+        reply::with_status(header, StatusCode::UNAUTHORIZED)
+    }
+}
+
+impl reject::Reject for BasicAuthError {}
