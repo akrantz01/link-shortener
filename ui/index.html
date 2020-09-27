@@ -63,6 +63,8 @@
                     <span aria-hidden="true"><i class="fas fa-times"></i></span>
                 </a>
 
+                <span id="edit-link-id" style="display: none"></span>
+
                 <h5 class="modal-title">Edit <code class="code" style="font-size: 1.5rem" id="edit-link-display-name"></code></h5>
                 <form id="edit-modal-form">
                     <div class="form-group">
@@ -94,6 +96,8 @@
                     <span aria-hidden="true"><i class="fas fa-times"></i></span>
                 </a>
 
+                <span id="delete-link-id" style="display: none"></span>
+
                 <h5 class="modal-title">Delete link?</h5>
                 <p class="text-muted">Are you sure you want to delete <code class="code" id="delete-link-name"></code>? This action cannot be undone.</p>
 
@@ -109,7 +113,6 @@
 
     <div class="page-wrapper with-navbar">
         <!-- Sticky alerts (toasts) -->
-        <!-- Reference: https://www.gethalfmoon.com/docs/sticky-alerts-toasts -->
         <div class="sticky-alerts"></div>
 
         <!-- Navbar -->
