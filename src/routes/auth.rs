@@ -1,5 +1,6 @@
 use crate::errors::BasicAuthError;
 use http_auth_basic::Credentials;
+use std::net::SocketAddr;
 use warp::{reject, Filter, Rejection};
 
 /// Add authentication to a route or set of routes

@@ -1,6 +1,7 @@
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
 use r2d2::Error as R2D2Error;
 use serde::Serialize;
+use std::error::Error;
 use std::{convert::Infallible, fmt};
 use warp::{
     http::StatusCode,
@@ -16,6 +17,8 @@ pub fn to_rejection<T: Into<ApiError>>(e: T) -> Rejection {
 
 /// Return responses for unhandled errors
 pub async fn handle_rejection(err: Rejection) -> Result<Box<dyn Reply>, Infallible> {
+    info!("{:?}", err);
+
     // Convert 404 to JSON
     if err.is_not_found() {
         Ok(Box::new(
@@ -30,9 +33,27 @@ pub async fn handle_rejection(err: Rejection) -> Result<Box<dyn Reply>, Infallib
     } else if let Some(e) = err.find::<ApiError>() {
         Ok(Box::new(e.to_http()))
 
+    // Payload too large
+    } else if let Some(_) = err.find::<reject::PayloadTooLarge>() {
+        Ok(Box::new(
+            ApiError::new("payload too large".into(), StatusCode::PAYLOAD_TOO_LARGE).to_http(),
+        ))
+
+    // Body deserialization error
+    } else if let Some(e) = err.find::<warp::filters::body::BodyDeserializeError>() {
+        Ok(Box::new(
+            ApiError::new(format!("{}", e.source().unwrap()), StatusCode::BAD_REQUEST).to_http(),
+        ))
+
+    // Method not allowed
+    } else if let Some(_) = err.find::<reject::MethodNotAllowed>() {
+        Ok(Box::new(
+            ApiError::new("method not allowed".into(), StatusCode::METHOD_NOT_ALLOWED).to_http(),
+        ))
+
     // Unknown error
     } else {
-        eprintln!("unhandled internal error: {:?}", err);
+        error!("unhandled internal error: {:?}", err);
         Ok(Box::new(
             ApiError::new(
                 "internal server error".into(),
