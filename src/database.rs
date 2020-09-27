@@ -2,6 +2,7 @@ use crate::schema::links;
 use anyhow::Context;
 use diesel::{pg::PgConnection, r2d2::ConnectionManager};
 use r2d2::{Error as R2D2Error, Pool as R2D2Pool, PooledConnection};
+use serde::{Deserialize, Serialize};
 
 pub type Pool = R2D2Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = Result<PooledConnection<ConnectionManager<PgConnection>>, R2D2Error>;
@@ -30,7 +31,7 @@ pub fn connect() -> anyhow::Result<Pool> {
 }
 
 /// Retrieve a link from the database
-#[derive(Identifiable, Queryable)]
+#[derive(Debug, Identifiable, Queryable, Serialize)]
 pub struct Link {
     pub id: i32,
     pub name: String,
@@ -40,9 +41,18 @@ pub struct Link {
 }
 
 /// Generate a new link from the name and URL
-#[derive(Insertable)]
+#[derive(Debug, Deserialize, Insertable)]
 #[table_name = "links"]
 pub struct NewLink {
     pub name: String,
     pub link: String,
+}
+
+// Changes to be made to a given link
+#[derive(AsChangeset, Debug, Deserialize)]
+#[table_name = "links"]
+pub struct UpdatableLink {
+    pub name: Option<String>,
+    pub link: Option<String>,
+    pub enabled: Option<bool>,
 }

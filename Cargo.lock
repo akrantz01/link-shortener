@@ -517,6 +517,7 @@ dependencies = [
  "r2d2",
  "rust-embed",
  "serde",
+ "serde_json",
  "tokio",
  "warp",
 ]

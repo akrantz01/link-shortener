@@ -2,6 +2,10 @@
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
+#[macro_use]
+extern crate serde_json;
+#[macro_use]
+extern crate warp;
 
 use anyhow::Context;
 use dotenv::dotenv;
