@@ -19,6 +19,10 @@ pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Reje
         .and(warp::path::end())
         .and(pool_filter.clone())
         .and_then(redirect::redirect_link);
+    let root_redirect = warp::get()
+        .and(warp::path::end())
+        .and(pool_filter.clone())
+        .and_then(redirect::root_redirect);
 
     // UI static files handlers
     let ui_index = warp::get()
@@ -64,5 +68,5 @@ pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Reje
         .or(api_update)
         .or(api_delete);
 
-    auth().and(protected).or(redirect)
+    auth().and(protected).or(root_redirect).or(redirect)
 }
