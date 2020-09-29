@@ -1,4 +1,7 @@
 #[deny(unused_variables, warnings, dead_code)]
+// OpenSSL must be before diesel to statically compile
+// See https://github.com/emk/rust-musl-builder/issues/69
+extern crate openssl;
 #[macro_use]
 extern crate diesel;
 #[macro_use]

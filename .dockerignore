@@ -1,0 +1,9 @@
+# Ignore git and build files
+.git
+target
+
+# Ignore secrets
+.env*
+
+# Documentation
+*.md
