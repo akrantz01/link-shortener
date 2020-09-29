@@ -14,10 +14,10 @@ Unlike the first two, `root` can function be accessed normally (i.e. `/root`).
 This can either be run just as a standalone binary or in a Docker container.
 However, you must have a supporting PostgreSQL database running to store the link mappings.
 Both are configured using environment variables as specified in [`.env.sample`](/.env.sample).
-*NOTE:* When running in a docker container, you must have the address listening on `0.0.0.0` or `::1` so it can be accessible from outside the container.
+**NOTE:** When running in a docker container, you must have the address listening on `0.0.0.0` or `::1` so it can be accessible from outside the container.
 
 ### Standalone Binary
-If you would like a standalone binary, one can be retrieved from the [Releases]() tab.
+If you would like a standalone binary, one can be retrieved from the [Releases](https://github.com/akrantz01/link-shortener/releases/latest) tab.
 Currently, only Linux binaries are provided.
 However, if your OS is not supported, follow the below instructions:
 1. Clone the repository: `git clone git@github.com:akrantz01/link-shortener.git`
