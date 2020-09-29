@@ -1,6 +1,6 @@
 use crate::{
     database::{DbConnection, Link, NewLink, UpdatableLink},
-    errors::{to_rejection, ApiError},
+    errors::{to_rejection, Error},
 };
 use diesel::prelude::*;
 use warp::http::{StatusCode, Uri};
@@ -96,19 +96,12 @@ pub async fn delete_link(
 }
 
 /// Ensure a URL is valid
-fn url_is_valid(unvalidated: &str) -> Result<(), ApiError> {
-    match unvalidated.parse::<Uri>() {
-        // Check if the scheme is valid
-        Ok(u) => match u.scheme() {
-            Some(_) => Ok(()),
-            None => Err(ApiError::new(
-                "the link scheme must be http or https".into(),
-                StatusCode::BAD_REQUEST,
-            )),
-        },
-        Err(e) => Err(ApiError::new(
-            format!("bad link, {}", e),
-            StatusCode::BAD_REQUEST,
-        )),
-    }
+fn url_is_valid(unvalidated: &str) -> Result<(), Error> {
+    // Parse the link
+    let parsed = unvalidated
+        .parse::<Uri>()
+        .map_err(|_| Error::invalid_link())?;
+
+    // Check if the scheme is valid
+    parsed.scheme().map(|_| ()).ok_or_else(Error::invalid_link)
 }

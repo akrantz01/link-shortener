@@ -28,7 +28,7 @@ pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Reje
     let ui_arbitrary = warp::get()
         .and(warp::path::path("ui"))
         .and(warp::path::tail())
-        .and_then(ui::serve_arbitrary);
+        .and_then(|t: warp::path::Tail| ui::serve_arbitrary(t.as_str().to_owned()));
 
     // API handlers
     let api_create = warp::post()
@@ -57,12 +57,12 @@ pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Reje
         .and_then(api::delete_link);
 
     // The set of routes to be protected
-    let protected = api_create
+    let protected = ui_index
+        .or(ui_arbitrary)
+        .or(api_create)
         .or(api_list)
         .or(api_update)
-        .or(api_delete)
-        .or(ui_index)
-        .or(ui_arbitrary);
+        .or(api_delete);
 
     auth().and(protected).or(redirect)
 }

@@ -1,7 +1,6 @@
-use crate::errors::BasicAuthError;
+use crate::errors::{to_rejection, Error};
 use http_auth_basic::Credentials;
-use std::net::SocketAddr;
-use warp::{reject, Filter, Rejection};
+use warp::{Filter, Rejection};
 
 /// Add authentication to a route or set of routes
 pub fn auth() -> impl Filter<Extract = (), Error = Rejection> + Copy {
@@ -24,12 +23,12 @@ async fn check_header(header: Option<String>) -> Result<(), Rejection> {
         if credentials.user_id == user_id || credentials.password == password {
             Ok(())
         } else {
-            Err(reject::custom(BasicAuthError::new(
+            Err(to_rejection(Error::authentication(
                 "Invalid username or password",
             )))
         }
     } else {
-        Err(reject::custom(BasicAuthError::new(
+        Err(to_rejection(Error::authentication(
             "Login to access the management UI",
         )))
     }
