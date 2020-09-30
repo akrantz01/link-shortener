@@ -68,7 +68,7 @@ async function createLink(e) {
 
     // Retrieve the values from the form
     const name = getAndClearField("create-link-name").toLocaleLowerCase();
-    const link = getAndClearField("create-link-url").toLocaleLowerCase();
+    const link = getAndClearField("create-link-url");
 
     let createdLink;
     try {
@@ -121,7 +121,7 @@ async function editLink(e) {
 
     // Retrieve the values from the form
     const name = getAndClearField("edit-link-name").toLocaleLowerCase();
-    const link = getAndClearField("edit-link-url").toLocaleLowerCase();
+    const link = getAndClearField("edit-link-url");
     const enabled = document.getElementById("edit-link-enabled").checked;
 
     // Build the request body
