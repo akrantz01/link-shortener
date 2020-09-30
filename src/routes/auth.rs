@@ -20,7 +20,7 @@ async fn check_header(header: Option<String>) -> Result<(), Rejection> {
         let credentials = Credentials::from_header(header).unwrap();
 
         // Check credentials
-        if credentials.user_id == user_id || credentials.password == password {
+        if credentials.user_id == user_id && credentials.password == password {
             Ok(())
         } else {
             Err(to_rejection(Error::authentication(
