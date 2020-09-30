@@ -8,10 +8,10 @@ services:
     networks:
       - default
     environment:
-      DATABASE_URL=postgres://links:please-change-me@database:5432/postgres
-      USER_ID=links
+      DATABASE_URL: "postgres://links:please-change-me@database:5432/postgres"
+      USER_ID: links
       # PLEASE CHANGE THIS
-      PASSWORD=please-change-me
+      PASSWORD: please-change-me
 
   database:
     image: postgres:13-alpine
@@ -20,11 +20,11 @@ services:
     networks:
       - default
     environment:
-      POSTGRES_USER=links
+      POSTGRES_USER: links
       # PLEASE CHANGE THIS
       # You also will need to change it on line 11
-      POSTGRES_PASSWORD=please-change-me
-      POSTGRES_DB=postgres
+      POSTGRES_PASSWORD: please-change-me
+      POSTGRES_DB: postgres
 
 volumes:
   db-data:
