@@ -26,47 +26,47 @@ pub fn build(pool: Pool) -> impl Filter<Extract = impl warp::Reply, Error = Reje
 
     // UI static files handlers
     let ui_index = warp::get()
-        .and(warp::path::path("ui"))
+        .and(path!("ui" / "home"))
         .and(warp::path::end())
         .and_then(ui::serve_index);
     let ui_arbitrary = warp::get()
         .and(warp::path::path("ui"))
-        .and(warp::path::tail())
-        .and_then(|t: warp::path::Tail| ui::serve_arbitrary(t.as_str().to_owned()));
+        .and(warp::path::param())
+        .and_then(|s: String| ui::serve_arbitrary(s));
 
     // API handlers
     let api_create = warp::post()
-        .and(warp::path::path("api"))
+        .and(path!("ui" / "api"))
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 16))
         .and(warp::body::json())
         .and(pool_filter.clone())
         .and_then(api::create_link);
     let api_list = warp::get()
-        .and(warp::path::path("api"))
+        .and(path!("ui" / "api"))
         .and(warp::path::end())
         .and(pool_filter.clone())
         .and_then(api::list_links);
     let api_update = warp::put()
-        .and(path!("api" / i32))
+        .and(path!("ui" / "api" / i32))
         .and(warp::path::end())
         .and(warp::body::content_length_limit(1024 * 16))
         .and(warp::body::json())
         .and(pool_filter.clone())
         .and_then(api::update_link);
     let api_delete = warp::delete()
-        .and(path!("api" / i32))
+        .and(path!("ui" / "api" / i32))
         .and(warp::path::end())
         .and(pool_filter)
         .and_then(api::delete_link);
 
     // The set of routes to be protected
-    let protected = ui_index
-        .or(ui_arbitrary)
-        .or(api_create)
+    let protected = api_create
         .or(api_list)
         .or(api_update)
-        .or(api_delete);
+        .or(api_delete)
+        .or(ui_index)
+        .or(ui_arbitrary);
 
     auth().and(protected).or(root_redirect).or(redirect)
 }

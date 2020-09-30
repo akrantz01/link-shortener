@@ -11,17 +11,6 @@ pub async fn redirect_link(
 ) -> Result<Box<dyn warp::Reply>, warp::Rejection> {
     use crate::schema::links::dsl::*;
 
-    // Fix improper redirection when attempting to access UI or API
-    if &path == "api" {
-        return Ok(Box::new(warp::redirect::redirect(
-            "/api/".parse::<Uri>().unwrap(),
-        )));
-    } else if &path == "ui" {
-        return Ok(Box::new(warp::redirect::redirect(
-            "/ui/".parse::<Uri>().unwrap(),
-        )));
-    }
-
     // Extract the connection from the error
     let conn = conn.map_err(to_rejection)?;
 

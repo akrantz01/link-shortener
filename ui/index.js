@@ -1,3 +1,5 @@
+const basePath = "/ui/api";
+
 window.onload = async () => {
     // Fetch initial set of links
     await fetchLinks();
@@ -24,7 +26,7 @@ async function fetchLinks() {
     let links;
     try {
         // Send the API call
-        const response = await fetch("/api");
+        const response = await fetch(basePath);
         links = await response.json();
 
         // Ensure successful
@@ -71,7 +73,7 @@ async function createLink(e) {
     let createdLink;
     try {
         // Send API call
-        const response = await fetch("/api", {
+        const response = await fetch(basePath, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -129,7 +131,7 @@ async function editLink(e) {
 
     try {
         // Send API call
-        const response = await fetch(`/api/${numericId}`, {
+        const response = await fetch(`${basePath}/${numericId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -190,7 +192,7 @@ async function deleteLink() {
 
     try {
         // Send API call
-        const response = await fetch(`/api/${numericId}`, { method: "DELETE" });
+        const response = await fetch(`${basePath}/${numericId}`, { method: "DELETE" });
 
         // Ensure successful
         if (response.status !== 204) {
