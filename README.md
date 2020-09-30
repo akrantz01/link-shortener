@@ -4,11 +4,10 @@ The site is served using the [warp](https://github.com/seanmonstar/warp) framewo
 There is also a simple administrative UI written in HTML, CSS, and JavaScript for creating, updating, and deleting short links that uses the server's API.
 To style the management interface, I used the [Halfmoon UI](https://github.com/halfmoonui/halfmoon) framework.
 
-### Reserved Names
-There are a few names for links that are reserved: `ui`, `api`, and `root`.
-Any link named `ui` or `api` cannot be routed to since it is the path for the management interface and path for the API respectively.
-As for `root`, it will be used as the redirect for the root path (i.e. just the application without any path).
-Unlike the first two, `root` can function be accessed normally (i.e. `/root`). 
+### Special Link Names
+When navigating to the service without specifying a path, you will be shown a 404 page by default.
+You can create a link with the name `root` that will be redirected to when you go to the service without specifying the path.
+Note that the name `root` will also be accessible from `/root`. 
 
 ## Deployment
 This can either be run just as a standalone binary or in a Docker container.
